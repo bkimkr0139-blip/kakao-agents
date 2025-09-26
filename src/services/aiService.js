@@ -4,9 +4,17 @@ const { v4: uuidv4 } = require('uuid');
 
 class AIService {
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+    // OpenAI API 키가 있을 때만 초기화
+    this.openai = null;
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        this.openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY
+        });
+      } catch (error) {
+        console.warn('OpenAI initialization failed:', error.message);
+      }
+    }
     
     // 대화 컨텍스트 저장 (실제 운영시에는 Redis나 DB 사용 권장)
     this.conversationHistory = new Map();
@@ -20,6 +28,22 @@ class AIService {
    */
   async generateResponse(userMessage, context = {}) {
     try {
+      // OpenAI가 초기화되지 않은 경우 기본 응답 반환
+      if (!this.openai) {
+        return {
+          type: 'text',
+          content: 'OpenAI API 키가 설정되지 않았습니다. 관리자 대시보드에서 API 키를 설정해주세요.',
+          quickReplies: ['설정 안내'],
+          metadata: {
+            sessionId: context.userId,
+            intent: context.intent,
+            action: context.action,
+            timestamp: new Date().toISOString(),
+            error: 'OpenAI not configured'
+          }
+        };
+      }
+
       const { userId, intent, action } = context;
       const sessionId = userId || uuidv4();
 
@@ -46,7 +70,7 @@ class AIService {
 
       // OpenAI API 호출
       const completion = await this.openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages,
         max_tokens: parseInt(process.env.MAX_TOKENS) || 500,
         temperature: parseFloat(process.env.TEMPERATURE) || 0.7,
