@@ -48,10 +48,15 @@ python start_server.py
 
 ### 3. 메신저 봇 R 앱 설정
 
-1. **앱 설치**: Google Play Store에서 "메신저 봇 R" 검색 후 설치
-2. **권한 허용**: 알림 액세스 권한 및 카카오톡 감지 활성화
-3. **웹훅 URL 설정**: `http://YOUR_SERVER_IP:3000/webhook/messenger-bot-r/message`
-4. **JSON 형식 설정**: 관리자 대시보드의 가이드 참조
+> 📝 **자세한 설정 가이드**: [MESSENGER_BOT_R_SETUP.md](MESSENGER_BOT_R_SETUP.md) 참조
+
+**간단 설정 순서:**
+1. **앱 설치**: Google Play Store에서 "메신저 봇 R" (개발자: XenomDev) 설치
+2. **권한 허용**: 알림 액세스 권한 필수 허용
+3. **서버 IP 확인**: `ipconfig` 명령어로 IPv4 주소 확인
+4. **웹훅 URL 설정**: `http://YOUR_IP:3000/webhook/messenger-bot-r/message`
+5. **JSON 페이로드 설정**: 아래 JSON 형식 입력
+6. **연결 테스트**: 관리자 대시보드에서 테스트
 
 ## 📡 API 엔드포인트
 
