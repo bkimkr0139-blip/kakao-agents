@@ -146,6 +146,50 @@ router.post('/test', async (req, res) => {
 });
 
 /**
+ * 메시지 요약 전용 엔드포인트
+ * POST /webhook/messenger-bot-r/summary
+ */
+router.post('/summary', async (req, res) => {
+  try {
+    const { message, lines = 3 } = req.body;
+    
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: '메시지가 필요합니다.'
+      });
+    }
+    
+    logger.info('📝 메시지 요약 요청', { messageLength: message.length, lines });
+    
+    // AI 서비스를 사용한 요약
+    const prompt = `다음 메시지를 정확히 ${lines}줄로 간결하게 요약해주세요. 핵심 내용만 포함하고 자연스러운 한국어로 작성해주세요:\n\n${message}`;
+    
+    const aiResponse = await aiService.generateResponse(prompt, {
+      userId: 'summary-request',
+      intent: 'summarize',
+      action: `summarize_${lines}_lines`
+    });
+    
+    res.json({
+      success: true,
+      original_message: message,
+      summary: aiResponse,
+      lines: lines,
+      model_used: process.env.OPENAI_MODEL || 'gpt-4o-mini'
+    });
+    
+  } catch (error) {
+    logger.error('메시지 요약 실패:', error);
+    res.status(500).json({
+      success: false,
+      error: '요약 생성 중 오류가 발생했습니다.',
+      details: error.message
+    });
+  }
+});
+
+/**
  * 메신저 봇 R 설정 정보 제공
  * GET /webhook/messenger-bot-r/config
  */
